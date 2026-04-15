@@ -17,11 +17,9 @@ services:
       - dg_uploads:/app/uploads
     networks:
       - dg_network
-
 volumes:
   dg_sqlite:
   dg_uploads:
-
 networks:
   dg_network:
     external: true
