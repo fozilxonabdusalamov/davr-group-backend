@@ -1,0 +1,28 @@
+services:
+  backend:
+    image: ghcr.io/itsoft-dev/davr-group-backend:latest
+    container_name: davr-group-backend
+    restart: unless-stopped
+    ports:
+      - "8101:8100"
+    environment:
+      DATABASE_URL: sqlite:////app/data/davr_group.db
+      SECRET_KEY: davr-group-secret-key-change-in-production-2024
+      ALGORITHM: HS256
+      ACCESS_TOKEN_EXPIRE_MINUTES: "1440"
+      UPLOAD_DIR: /app/uploads
+      DEBUG: "False"
+    volumes:
+      - dg_sqlite:/app/data
+      - dg_uploads:/app/uploads
+    networks:
+      - dg_network
+
+volumes:
+  dg_sqlite:
+  dg_uploads:
+
+networks:
+  dg_network:
+    external: true
+    name: dg_network
