@@ -144,6 +144,16 @@ class QuoteRequest(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 
+class LegalPage(Base):
+    __tablename__ = "legal_pages"
+    id = Column(Integer, primary_key=True, index=True)
+    slug = Column(String(50), unique=True, nullable=False)  # privacy, terms
+    title = Column(String(300), nullable=False)
+    sections = Column(Text, default="[]")  # JSON array of {heading, content}
+    last_updated = Column(String(50), default="")
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
 class HeroSection(Base):
     __tablename__ = "hero_sections"
     id = Column(Integer, primary_key=True, index=True)

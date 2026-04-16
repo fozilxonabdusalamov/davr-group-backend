@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.core.security import get_current_admin
 from app.models.models import (
-    Stat, CompanyInfo, TimelineEvent, CompanyValue, WhyChooseUs, HeroSection,
+    Stat, CompanyInfo, TimelineEvent, CompanyValue, WhyChooseUs, HeroSection, LegalPage,
 )
 from app.schemas.schemas import (
     StatCreate, StatUpdate, StatOut,
@@ -13,6 +13,7 @@ from app.schemas.schemas import (
     CompanyValueCreate, CompanyValueUpdate, CompanyValueOut,
     WhyChooseUsCreate, WhyChooseUsUpdate, WhyChooseUsOut,
     HeroSectionCreate, HeroSectionUpdate, HeroSectionOut,
+    LegalPageCreate, LegalPageUpdate, LegalPageOut,
 )
 
 router = APIRouter(prefix="/api/content", tags=["content"])
@@ -216,6 +217,58 @@ def delete_why_choose_us(item_id: int, db: Session = Depends(get_db), admin=Depe
     db.delete(item)
     db.commit()
     return {"detail": "Item deleted"}
+
+
+# ---- Legal Pages ----
+@router.get("/legal", response_model=list[LegalPageOut])
+def get_legal_pages(db: Session = Depends(get_db)):
+    return db.query(LegalPage).all()
+
+
+@router.get("/legal/{slug}", response_model=LegalPageOut)
+def get_legal_page(slug: str, db: Session = Depends(get_db)):
+    page = db.query(LegalPage).filter(LegalPage.slug == slug).first()
+    if not page:
+        raise HTTPException(status_code=404, detail="Legal page not found")
+    return page
+
+
+@router.post("/legal", response_model=LegalPageOut)
+def create_legal_page(data: LegalPageCreate, db: Session = Depends(get_db), admin=Depends(get_current_admin)):
+    existing = db.query(LegalPage).filter(LegalPage.slug == data.slug).first()
+    if existing:
+        for key, value in data.model_dump().items():
+            setattr(existing, key, value)
+        db.commit()
+        db.refresh(existing)
+        return existing
+    page = LegalPage(**data.model_dump())
+    db.add(page)
+    db.commit()
+    db.refresh(page)
+    return page
+
+
+@router.put("/legal/{page_id}", response_model=LegalPageOut)
+def update_legal_page(page_id: int, data: LegalPageUpdate, db: Session = Depends(get_db), admin=Depends(get_current_admin)):
+    page = db.query(LegalPage).filter(LegalPage.id == page_id).first()
+    if not page:
+        raise HTTPException(status_code=404, detail="Legal page not found")
+    for key, value in data.model_dump(exclude_unset=True).items():
+        setattr(page, key, value)
+    db.commit()
+    db.refresh(page)
+    return page
+
+
+@router.delete("/legal/{page_id}")
+def delete_legal_page(page_id: int, db: Session = Depends(get_db), admin=Depends(get_current_admin)):
+    page = db.query(LegalPage).filter(LegalPage.id == page_id).first()
+    if not page:
+        raise HTTPException(status_code=404, detail="Legal page not found")
+    db.delete(page)
+    db.commit()
+    return {"detail": "Legal page deleted"}
 
 
 # ---- Hero Section ----

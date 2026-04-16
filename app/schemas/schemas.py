@@ -350,6 +350,37 @@ class QuoteRequestOut(BaseModel):
         from_attributes = True
 
 
+# ---- Legal Page ----
+class LegalSectionItem(BaseModel):
+    heading: str = ""
+    content: str = ""
+
+
+class LegalPageBase(BaseModel):
+    slug: str
+    title: str
+    sections: str = "[]"  # JSON string of LegalSectionItem[]
+    last_updated: str = ""
+
+
+class LegalPageCreate(LegalPageBase):
+    pass
+
+
+class LegalPageUpdate(BaseModel):
+    title: str | None = None
+    sections: str | None = None
+    last_updated: str | None = None
+
+
+class LegalPageOut(LegalPageBase):
+    id: int
+    updated_at: datetime | None = None
+
+    class Config:
+        from_attributes = True
+
+
 # ---- Hero Section ----
 class HeroSectionBase(BaseModel):
     title: str
